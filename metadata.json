@@ -1,0 +1,5 @@
+{
+  "name": "Yukime Local AI",
+  "description": "A high-performance, private AI interface exclusively for local engines like LM Studio. Zero cloud dependencies, zero external APIs.",
+  "requestFramePermissions": []
+}
