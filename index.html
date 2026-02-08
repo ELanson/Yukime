@@ -11,25 +11,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
   <style>
     :root {
-      --primary: 99 102 241; /* Electric Indigo */
-      --accent: 45 212 191; /* Cyber Teal */
+      --primary: 99 102 241;
+      --accent: 45 212 191;
       --bg-main: #050505;
       --bg-sidebar: #080808;
       --text-primary: #fafafa;
       --text-secondary: #a1a1aa;
       --border-primary: rgba(255, 255, 255, 0.05);
       --glass-bg: rgba(255, 255, 255, 0.02);
-      --glass-strong: rgba(10, 10, 10, 0.7);
-    }
-
-    .light {
-      --bg-main: #ffffff;
-      --bg-sidebar: #f8fafc;
-      --text-primary: #0f172a;
-      --text-secondary: #64748b;
-      --border-primary: rgba(0, 0, 0, 0.06);
-      --glass-bg: rgba(0, 0, 0, 0.03);
-      --glass-strong: rgba(255, 255, 255, 0.8);
+      --glass-strong: rgba(10, 10, 10, 0.85);
     }
 
     body {
@@ -38,7 +28,6 @@
       color: var(--text-primary);
       overflow: hidden;
       letter-spacing: -0.01em;
-      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .glass {
@@ -48,7 +37,7 @@
     }
 
     .glass-strong {
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px);
       background: var(--glass-strong);
       border: 1px solid var(--border-primary);
     }
@@ -63,9 +52,6 @@
       background: rgba(128, 128, 128, 0.2);
       border-radius: 10px;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: rgba(128, 128, 128, 0.3);
-    }
 
     /* Markdown Styling */
     .prose {
@@ -74,7 +60,7 @@
       line-height: 1.6;
     }
     .prose pre {
-      background: #0a0a0a !important;
+      background: #0d0d0d !important;
       border: 1px solid var(--border-primary);
       border-radius: 12px;
       padding: 1rem !important;
@@ -92,22 +78,7 @@
       background: transparent;
       padding: 0;
     }
-    .prose p {
-      margin-bottom: 1rem;
-    }
-    .prose h1, .prose h2, .prose h3 {
-      color: var(--text-primary);
-      font-weight: 600;
-      margin-top: 1.5rem;
-      margin-bottom: 0.75rem;
-    }
-    .prose ul, .prose ol {
-      margin-bottom: 1rem;
-      padding-left: 1.25rem;
-    }
-    .prose li {
-      margin-bottom: 0.25rem;
-    }
+    
     @keyframes subtle-float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-4px); }
@@ -127,20 +98,23 @@
       40% { transform: scale(1); opacity: 1; }
     }
   </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@^19.2.4",
+      "react-dom": "https://esm.sh/react-dom@^19.2.4",
+      "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+      "react/": "https://esm.sh/react@^19.2.4/",
+      "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
+    }
   }
-}
-</script>
+  </script>
 </head>
 <body>
   <div id="root"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <!-- Main Application Entry Point -->
+  <script type="module" src="./index.tsx"></script>
 </body>
 </html>

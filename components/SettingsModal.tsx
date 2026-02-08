@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Globe, Cpu, Check, AlertCircle, Server, RefreshCw, Info, ExternalLink } from 'lucide-react';
+import { X, Globe, Cpu, Check, AlertCircle, Server, RefreshCw, Info, ExternalLink, ShieldAlert } from 'lucide-react';
 import { AppSettings, LMStudioModel } from '../types';
 
 interface SettingsModalProps {
@@ -23,6 +23,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const [isTesting, setIsTesting] = useState(false);
+  const isHttps = window.location.protocol === 'https:';
 
   const handleConnect = async () => {
     setIsTesting(true);
@@ -62,6 +63,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         <div className="p-8 space-y-8">
+          {isHttps && !isConnected && (
+            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-amber-200/80 text-[11px] leading-relaxed flex gap-3">
+              <ShieldAlert className="text-amber-500 shrink-0" size={18} />
+              <div>
+                <span className="font-bold text-amber-500 uppercase block mb-1">Vercel Deployment Note</span>
+                Chrome blocks "Mixed Content" (HTTPS site calling HTTP localhost). 
+                To fix: Click the <strong className="text-white">lock icon</strong> next to the URL &rarr; <strong className="text-white">Site Settings</strong> &rarr; Set <strong className="text-white">Insecure Content</strong> to <strong className="text-white">Allow</strong>.
+              </div>
+            </div>
+          )}
+
           {/* Server URL Input */}
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-1">
