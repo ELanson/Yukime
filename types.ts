@@ -25,6 +25,7 @@ export interface Chat {
   name: string;
   messages: Message[];
   createdAt: number;
+  isPinned?: boolean;
 }
 
 export interface LMStudioModel {

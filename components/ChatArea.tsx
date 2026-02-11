@@ -373,8 +373,12 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             className="w-full bg-black/20 border border-white/10 rounded-xl p-3 outline-none text-[15px] custom-scrollbar focus:ring-1 focus:ring-indigo-500/50 resize-none min-h-[80px]"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSaveEdit();
+                // Desktop Enter-to-save for editing
+                const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (window.innerWidth < 768 && navigator.maxTouchPoints > 0);
+                if (!isMobileDevice) {
+                  e.preventDefault();
+                  handleSaveEdit();
+                }
               }
               if (e.key === 'Escape') handleCancelEdit();
             }}
@@ -542,7 +546,17 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onPaste={handlePaste}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  // Properly detect mobile environment to change Enter behavior
+                  const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (window.innerWidth < 768 && navigator.maxTouchPoints > 0);
+                  if (!isMobileDevice) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                  // On mobile, default behavior (newline) is preserved by not calling preventDefault
+                }
+              }}
               disabled={isStreaming || !isConnected || editingIndex !== null}
               placeholder={isConnected ? (isStreaming ? "Synthesizing response..." : (editingIndex !== null ? "Complete your edit above..." : "Ask your local model...")) : "Engine offline - Check system config"}
               className="w-full bg-transparent px-5 md:px-6 py-4 md:py-5 outline-none resize-none min-h-[56px] md:min-h-[64px] max-h-[150px] md:max-h-[200px] text-[14px] md:text-[15px] custom-scrollbar"

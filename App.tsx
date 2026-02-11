@@ -36,7 +36,6 @@ const App: React.FC = () => {
     if (savedChats) {
       const parsed = JSON.parse(savedChats);
       setChats(parsed);
-      // We don't automatically set activeChatId here to ensure we start on the Landing Page (EmptyState)
     }
 
     const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
@@ -44,10 +43,9 @@ const App: React.FC = () => {
       setSettings(JSON.parse(savedSettings));
     }
 
-    // Responsive listener to handle resizing
     const handleResize = () => {
       if (window.innerWidth < 768 && isSidebarOpen) {
-        // Optional: auto-close if resizing down to mobile
+        // Optional logic for responsive behavior
       }
     };
     window.addEventListener('resize', handleResize);
@@ -81,7 +79,7 @@ const App: React.FC = () => {
       const testUrl = `${rootUrl}/v1/models`;
 
       if (window.location.protocol === 'https:' && rootUrl.startsWith('http:')) {
-        throw new Error('Mixed Content Error: HTTPS sites cannot connect to HTTP local servers directly. Check browser settings to allow insecure content for localhost.');
+        throw new Error('Mixed Content Error: HTTPS sites cannot connect to HTTP local servers directly.');
       }
 
       const controller = new AbortController();
@@ -128,6 +126,7 @@ const App: React.FC = () => {
       name: 'New Thread',
       messages: [],
       createdAt: Date.now(),
+      isPinned: false
     };
     setChats(prev => [newChat, ...prev]);
     setActiveChatId(newChat.id);
@@ -145,6 +144,10 @@ const App: React.FC = () => {
 
   const renameChat = (chatId: string, newName: string) => {
     setChats(prev => prev.map(chat => chat.id === chatId ? { ...chat, name: newName } : chat));
+  };
+
+  const togglePin = (chatId: string) => {
+    setChats(prev => prev.map(chat => chat.id === chatId ? { ...chat, isPinned: !chat.isPinned } : chat));
   };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -165,6 +168,8 @@ const App: React.FC = () => {
         onSelectChat={(id) => { setActiveChatId(id); if(window.innerWidth < 768) setIsSidebarOpen(false); }}
         onNewChat={createNewChat}
         onDeleteChat={deleteChat}
+        onRenameChat={renameChat}
+        onTogglePin={togglePin}
         onOpenSettings={() => setIsSettingsOpen(true)}
         isConnected={isConnected}
         onToggle={toggleSidebar}
@@ -185,7 +190,6 @@ const App: React.FC = () => {
           />
         ) : (
           <div className="flex-1 flex flex-col h-full overflow-y-auto custom-scrollbar relative">
-            {/* Show toggle button when empty and sidebar is closed */}
             {!isSidebarOpen && (
               <div className="absolute top-4 left-4 z-50">
                 <button 
