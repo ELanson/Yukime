@@ -1,4 +1,3 @@
-
 export interface MessageContentPart {
   type: 'text' | 'image_url';
   text?: string;
@@ -10,6 +9,7 @@ export interface MessageContentPart {
 export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string | MessageContentPart[];
+  timestamp?: number;
 }
 
 export interface Attachment {

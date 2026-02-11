@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 /* Added Pencil and Check/X icons for editing */
 import { Send, Sparkles, Paperclip, Terminal, User, Square, X, FileText, Image as ImageIcon, ChevronDown, Zap, PanelLeftOpen, Pencil, Check } from 'lucide-react';
@@ -93,13 +92,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     return () => document.removeEventListener('click', handleCopyClick);
   }, []);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
+  const processFiles = async (files: File[]) => {
     const newAttachments: Attachment[] = [];
-    // Fix: Explicitly cast Array.from(files) to File[] to resolve type inference errors where file is 'unknown'
-    for (const file of Array.from(files) as File[]) {
+    for (const file of files) {
       const isImage = file.type.startsWith('image/');
       const attachment: Attachment = {
         id: Math.random().toString(36).substr(2, 9),
@@ -119,9 +114,33 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       }
       newAttachments.push(attachment);
     }
+    return newAttachments;
+  };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newAttachments = await processFiles(Array.from(files) as File[]);
     setAttachments(prev => [...prev, ...newAttachments]);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    const files: File[] = [];
+    
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        if (file) files.push(file);
+      }
+    }
+    
+    if (files.length > 0) {
+      // Don't preventDefault if we want the text to also paste (if any)
+      const newAttachments = await processFiles(files);
+      setAttachments(prev => [...prev, ...newAttachments]);
+    }
   };
 
   const removeAttachment = (id: string) => {
@@ -139,6 +158,15 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = error => reject(error);
     });
+  };
+
+  const formatTime = (timestamp?: number) => {
+    if (!timestamp) return '';
+    return new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).format(new Date(timestamp));
   };
 
   const generateTitle = async (messages: Message[]) => {
@@ -179,6 +207,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     isStoppedRef.current = false;
     abortControllerRef.current = new AbortController();
     setIsStreaming(true);
+    const assistantStartTime = Date.now();
 
     try {
       const rootUrl = settings.serverUrl.trim().replace(/\/+$/, '').replace(/\/v1$/, '');
@@ -214,17 +243,17 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             try {
               const parsed = JSON.parse(dataStr);
               assistantContent += parsed.choices[0]?.delta?.content || '';
-              onUpdateMessages([...history, { role: 'assistant', content: assistantContent } as Message]);
+              onUpdateMessages([...history, { role: 'assistant', content: assistantContent, timestamp: assistantStartTime } as Message]);
             } catch {}
           }
         }
       }
 
-      if (chat.messages.length === 0 && assistantContent) generateTitle([...history, { role: 'assistant', content: assistantContent }]);
+      if (chat.messages.length === 0 && assistantContent) generateTitle([...history, { role: 'assistant', content: assistantContent, timestamp: assistantStartTime }]);
 
     } catch (err: any) {
       if (err.name !== 'AbortError') {
-        onUpdateMessages([...history, { role: 'assistant', content: `⚠️ Error: ${err.message}` }]);
+        onUpdateMessages([...history, { role: 'assistant', content: `⚠️ Error: ${err.message}`, timestamp: Date.now() }]);
       }
     } finally {
       setIsStreaming(false);
@@ -259,7 +288,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 
     const userMsg: Message = { 
       role: 'user', 
-      content: finalContent.length === 1 && finalContent[0].type === 'text' ? finalContent[0].text! : finalContent 
+      content: finalContent.length === 1 && finalContent[0].type === 'text' ? finalContent[0].text! : finalContent,
+      timestamp: Date.now()
     };
 
     const newMessages = [...chat.messages, userMsg];
@@ -311,7 +341,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     }
 
     const updatedMessages = [...chat.messages.slice(0, editingIndex)];
-    updatedMessages.push({ ...originalMsg, content: newContent });
+    updatedMessages.push({ ...originalMsg, content: newContent, timestamp: Date.now() });
     
     setEditingIndex(null);
     setEditValue('');
@@ -473,16 +503,24 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                     {renderMessageContent(msg, editingIndex === idx)}
                   </div>
                   
-                  {/* Edit Trigger */}
-                  {msg.role === 'user' && editingIndex === null && !isStreaming && (
-                    <button 
-                      onClick={() => handleStartEdit(idx)}
-                      className="absolute -left-10 top-2 opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-all hidden md:block"
-                      title="Edit message"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                  )}
+                  {/* Timestamp & Edit Trigger */}
+                  <div className={`mt-1.5 flex items-center gap-3 transition-opacity duration-300 opacity-20 group-hover:opacity-100 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    {msg.timestamp && (
+                      <span className="text-[10px] font-mono text-zinc-500 tabular-nums">
+                        {formatTime(msg.timestamp)}
+                      </span>
+                    )}
+                    
+                    {msg.role === 'user' && editingIndex === null && !isStreaming && (
+                      <button 
+                        onClick={() => handleStartEdit(idx)}
+                        className="p-1 text-zinc-500 hover:text-white hover:bg-white/5 rounded transition-all hidden md:block"
+                        title="Edit message"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -539,6 +577,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               rows={1}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              onPaste={handlePaste}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
               disabled={isStreaming || !isConnected || editingIndex !== null}
               placeholder={isConnected ? (isStreaming ? "Synthesizing response..." : (editingIndex !== null ? "Complete your edit above..." : "Ask your local model...")) : "Engine offline - Check system config"}
