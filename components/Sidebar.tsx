@@ -6,7 +6,7 @@ interface SidebarProps {
   isOpen: boolean;
   chats: Chat[];
   activeChatId: string | null;
-  onSelectChat: (id: string) => void;
+  onSelectChat: (id: string | null) => void;
   onNewChat: () => void;
   onDeleteChat: (id: string) => void;
   onRenameChat: (id: string, name: string) => void;
@@ -145,15 +145,19 @@ const Sidebar: React.FC<SidebarProps> = ({
       
       {/* Brand Header */}
       <div className="p-6 flex items-center justify-between min-w-[280px]">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
+        <button 
+          onClick={() => onSelectChat(null)}
+          className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity cursor-pointer group/brand"
+          title="Go to Home"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/10 group-hover/brand:scale-105 transition-transform">
             <Zap size={20} className="text-white fill-current" />
           </div>
           <div>
             <h1 className="font-bold text-base tracking-tight leading-none text-white">Yukime</h1>
             <p className="text-[10px] font-medium tracking-wide mt-1 text-zinc-500 uppercase">Local Intelligence</p>
           </div>
-        </div>
+        </button>
         <button onClick={onToggle} className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-white">
           <X size={18} className="md:hidden" />
           <MoreVertical size={18} className="hidden md:block opacity-40" />
