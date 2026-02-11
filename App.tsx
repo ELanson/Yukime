@@ -22,7 +22,8 @@ const DEFAULT_SETTINGS: AppSettings = {
 const App: React.FC = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // Default to closed on mobile, open on desktop
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [models, setModels] = useState<LMStudioModel[]>([]);
@@ -35,13 +36,22 @@ const App: React.FC = () => {
     if (savedChats) {
       const parsed = JSON.parse(savedChats);
       setChats(parsed);
-      if (parsed.length > 0) setActiveChatId(parsed[0].id);
+      // We don't automatically set activeChatId here to ensure we start on the Landing Page (EmptyState)
     }
 
     const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
     }
+
+    // Responsive listener to handle resizing
+    const handleResize = () => {
+      if (window.innerWidth < 768 && isSidebarOpen) {
+        // Optional: auto-close if resizing down to mobile
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -121,6 +131,7 @@ const App: React.FC = () => {
     };
     setChats(prev => [newChat, ...prev]);
     setActiveChatId(newChat.id);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
   };
 
   const deleteChat = (id: string) => {
@@ -141,7 +152,7 @@ const App: React.FC = () => {
   const activeChat = chats.find(c => c.id === activeChatId) || null;
 
   return (
-    <div className="flex h-screen w-full bg-[#050505] transition-colors duration-300 overflow-hidden font-sans" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}>
+    <div className="flex h-[100dvh] w-full bg-[#050505] transition-colors duration-300 overflow-hidden font-sans" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}>
       {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
@@ -159,7 +170,7 @@ const App: React.FC = () => {
         onToggle={toggleSidebar}
       />
 
-      <main className="flex-1 flex flex-col relative overflow-hidden">
+      <main className="flex-1 flex flex-col relative overflow-hidden h-full">
         {activeChat ? (
           <ChatArea 
             chat={activeChat}
@@ -173,7 +184,7 @@ const App: React.FC = () => {
             onToggleSidebar={toggleSidebar}
           />
         ) : (
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col h-full overflow-y-auto custom-scrollbar relative">
             {/* Show toggle button when empty and sidebar is closed */}
             {!isSidebarOpen && (
               <div className="absolute top-4 left-4 z-50">

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 /* Added Pencil and Check/X icons for editing */
 import { Send, Sparkles, Paperclip, Terminal, User, Square, X, FileText, Image as ImageIcon, ChevronDown, Zap, PanelLeftOpen, Pencil, Check } from 'lucide-react';
@@ -97,7 +98,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     if (!files) return;
 
     const newAttachments: Attachment[] = [];
-    for (const file of Array.from(files)) {
+    // Fix: Explicitly cast Array.from(files) to File[] to resolve type inference errors where file is 'unknown'
+    for (const file of Array.from(files) as File[]) {
       const isImage = file.type.startsWith('image/');
       const attachment: Attachment = {
         id: Math.random().toString(36).substr(2, 9),
@@ -405,9 +407,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 h-full relative">
+    <div className="flex-1 flex flex-col min-w-0 h-[100dvh] relative overflow-hidden">
       {/* Header Info */}
-      <div className="absolute top-0 left-0 right-0 h-16 glass-strong z-20 flex items-center justify-between px-6 border-b border-white/[0.05]">
+      <div className="h-16 glass-strong z-20 flex items-center justify-between px-6 border-b border-white/[0.05] shrink-0">
         <div className="flex items-center gap-3">
           {!isSidebarOpen && (
             <button 
@@ -421,9 +423,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
             <Sparkles size={16} />
           </div>
-          <div>
-            <h2 className="text-sm font-semibold truncate max-w-[200px] md:max-w-md" style={{ color: 'var(--text-primary)' }}>{chat.name}</h2>
-            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-tighter">
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold truncate max-w-[150px] md:max-w-md" style={{ color: 'var(--text-primary)' }}>{chat.name}</h2>
+            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-tighter truncate max-w-[150px]">
               {settings.currentModel || 'No Model Loaded'}
             </p>
           </div>
@@ -435,8 +437,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar pt-20 pb-48">
-        <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-12">
+      {/* Message List */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar pt-6 pb-40">
+        <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-12 pb-10">
           {chat.messages.length === 0 && !isStreaming && (
             <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
                <div className="w-16 h-16 rounded-full glass flex items-center justify-center text-zinc-700">
@@ -450,7 +453,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           )}
           
           {chat.messages.map((msg, idx) => (
-            <div key={idx} className={`flex gap-5 group animate-in fade-in slide-in-from-bottom-2 duration-500 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+            <div key={idx} className={`flex gap-3 md:gap-5 group animate-in fade-in slide-in-from-bottom-2 duration-500 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
               <div className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center shadow-sm mt-1 transition-transform group-hover:scale-110 ${
                 msg.role === 'user' 
                 ? 'bg-indigo-600 text-white ring-1 ring-white/20' 
@@ -459,9 +462,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 {msg.role === 'user' ? <User size={16} /> : <Zap size={16} />}
               </div>
               <div className={`flex-1 min-w-0 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-                <div className="relative inline-block max-w-[92%]">
+                <div className="relative inline-block max-w-full md:max-w-[92%]">
                   <div className={`
-                    px-5 py-4 rounded-2xl text-[15px] transition-all w-full
+                    px-4 py-3 md:px-5 md:py-4 rounded-2xl text-[14px] md:text-[15px] transition-all w-full text-left
                     ${msg.role === 'user' 
                       ? 'bg-zinc-100 dark:bg-zinc-900/40 text-zinc-900 dark:text-zinc-100 border-r-2 border-indigo-500 shadow-sm' 
                       : 'bg-zinc-50 dark:bg-white/[0.02] text-zinc-800 dark:text-zinc-200 border border-black/5 dark:border-white/5'
@@ -474,7 +477,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                   {msg.role === 'user' && editingIndex === null && !isStreaming && (
                     <button 
                       onClick={() => handleStartEdit(idx)}
-                      className="absolute -left-10 top-2 opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                      className="absolute -left-10 top-2 opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-all hidden md:block"
                       title="Edit message"
                     >
                       <Pencil size={14} />
@@ -501,7 +504,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       </div>
 
       {/* Floating Pill Input */}
-      <div className={`absolute bottom-0 left-0 right-0 p-6 z-30 pointer-events-none transition-all ${editingIndex !== null ? 'opacity-30 blur-[2px]' : ''}`}>
+      <div className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 z-30 pointer-events-none transition-all ${editingIndex !== null ? 'opacity-30 blur-[2px]' : ''}`}>
         <div className="max-w-3xl mx-auto pointer-events-auto">
           {/* Attachments Preview */}
           {attachments.length > 0 && (
@@ -539,38 +542,38 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
               disabled={isStreaming || !isConnected || editingIndex !== null}
               placeholder={isConnected ? (isStreaming ? "Synthesizing response..." : (editingIndex !== null ? "Complete your edit above..." : "Ask your local model...")) : "Engine offline - Check system config"}
-              className="w-full bg-transparent px-6 py-5 outline-none resize-none min-h-[64px] max-h-[200px] text-[15px] custom-scrollbar"
+              className="w-full bg-transparent px-5 md:px-6 py-4 md:py-5 outline-none resize-none min-h-[56px] md:min-h-[64px] max-h-[150px] md:max-h-[200px] text-[14px] md:text-[15px] custom-scrollbar"
               style={{ color: 'var(--text-primary)' }}
               onInput={(e) => { (e.target as any).style.height = 'auto'; (e.target as any).style.height = (e.target as any).scrollHeight + 'px'; }}
             />
             
-            <div className="flex items-center justify-between px-4 pb-4 pt-1">
-              <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between px-3 md:px-4 pb-3 md:pb-4 pt-1">
+              <div className="flex items-center gap-1">
                 <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileSelect} multiple accept="image/*,.txt,.md,.js,.ts,.json,.html,.css,.py,.rs,.go" />
                 <button 
                   onClick={() => fileInputRef.current?.click()} 
                   disabled={isStreaming || !isConnected || editingIndex !== null} 
                   title="Upload Image/File"
-                  className="p-2.5 text-zinc-500 hover:text-indigo-500 dark:hover:text-white transition-all hover:bg-black/5 dark:hover:bg-white/5 rounded-xl active:scale-90"
+                  className="p-2 md:p-2.5 text-zinc-500 hover:text-indigo-500 dark:hover:text-white transition-all hover:bg-black/5 dark:hover:bg-white/5 rounded-xl active:scale-90"
                 >
-                  <Paperclip size={19} />
+                  <Paperclip size={18} />
                 </button>
                 <button 
                    onClick={() => fileInputRef.current?.click()} 
                    disabled={isStreaming || !isConnected || editingIndex !== null} 
-                   className="p-2.5 text-zinc-500 hover:text-indigo-500 dark:hover:text-white transition-all hover:bg-black/5 dark:hover:bg-white/5 rounded-xl active:scale-90"
+                   className="p-2 md:p-2.5 text-zinc-500 hover:text-indigo-500 dark:hover:text-white transition-all hover:bg-black/5 dark:hover:bg-white/5 rounded-xl active:scale-90"
                 >
-                  <ImageIcon size={19} />
+                  <ImageIcon size={18} />
                 </button>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 {isStreaming ? (
                   <button 
                     onClick={handleStopStreaming} 
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all border border-rose-500/20 active:scale-95 text-xs font-bold"
+                    className="flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all border border-rose-500/20 active:scale-95 text-[10px] md:text-xs font-bold"
                   >
-                    <Square size={14} fill="currentColor" />
+                    <Square size={12} fill="currentColor" />
                     STOP
                   </button>
                 ) : (
@@ -578,19 +581,19 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                     onClick={handleSendMessage} 
                     disabled={(!inputValue.trim() && attachments.length === 0) || !isConnected || editingIndex !== null} 
                     className={`
-                      w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300
+                      w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-2xl transition-all duration-300
                       ${(inputValue.trim() || attachments.length > 0) && isConnected && editingIndex === null
                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 hover:scale-105 active:scale-90' 
                         : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 opacity-50'}
                     `}
                   >
-                    <Send size={18} />
+                    <Send size={16} />
                   </button>
                 )}
               </div>
             </div>
           </div>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-600 text-center mt-3 font-medium uppercase tracking-widest opacity-60">
+          <p className="hidden md:block text-[10px] text-zinc-500 dark:text-zinc-600 text-center mt-3 font-medium uppercase tracking-widest opacity-60">
             Powered by local inference • zero cloud latency
           </p>
         </div>
