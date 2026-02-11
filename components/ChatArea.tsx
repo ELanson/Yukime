@@ -426,7 +426,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 h-[100dvh] relative overflow-hidden">
+    <div className="flex-1 flex flex-col min-w-0 h-[100dvh] relative overflow-hidden bg-[#050505]">
       {/* Header Info */}
       <div className="h-16 glass-strong z-20 flex items-center justify-between px-6 border-b border-white/[0.05] shrink-0">
         <div className="flex items-center gap-3">
@@ -448,58 +448,60 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         </div>
       </div>
 
-      {/* Message List */}
-      <div 
-        ref={scrollRef} 
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto custom-scrollbar pt-6 pb-40 relative touch-pan-y"
-      >
-        <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-12 pb-10">
-          {chat.messages.length === 0 && !isStreaming && (
-            <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-               <div className="w-16 h-16 rounded-full glass flex items-center justify-center text-zinc-700"><Terminal size={32} /></div>
-               <div>
-                 <h3 className="font-medium" style={{ color: 'var(--text-primary)' }}>Empty Thread</h3>
-                 <p className="text-sm text-zinc-500">Ask your local intelligence anything.</p>
-               </div>
-            </div>
-          )}
-          
-          {chat.messages.map((msg, idx) => (
-            <div key={idx} className={`flex gap-3 md:gap-5 group animate-in fade-in slide-in-from-bottom-2 duration-500 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-              <div className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center shadow-sm mt-1 transition-transform group-hover:scale-110 ${msg.role === 'user' ? 'bg-indigo-600 text-white ring-1 ring-white/20' : 'bg-white/[0.03] text-indigo-400 border border-white/10'}`}>
-                {msg.role === 'user' ? <User size={16} /> : <Zap size={16} />}
+      {/* Message List - Now constrained by the fixed bottom area */}
+      <div className="flex-1 relative overflow-hidden flex flex-col">
+        <div 
+          ref={scrollRef} 
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto custom-scrollbar pt-6 pb-4 relative touch-pan-y"
+        >
+          <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-12 pb-10">
+            {chat.messages.length === 0 && !isStreaming && (
+              <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                 <div className="w-16 h-16 rounded-full glass flex items-center justify-center text-zinc-700"><Terminal size={32} /></div>
+                 <div>
+                   <h3 className="font-medium" style={{ color: 'var(--text-primary)' }}>Empty Thread</h3>
+                   <p className="text-sm text-zinc-500">Ask your local intelligence anything.</p>
+                 </div>
               </div>
-              <div className={`flex-1 min-w-0 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-                <div className="relative inline-block max-w-full md:max-w-[92%]">
-                  <div className={`px-4 py-3 md:px-5 md:py-4 rounded-2xl text-[14px] md:text-[15px] transition-all w-full text-left ${msg.role === 'user' ? 'bg-zinc-100 dark:bg-zinc-900/40 text-zinc-900 dark:text-zinc-100 border-r-2 border-indigo-500 shadow-sm' : 'bg-zinc-50 dark:bg-white/[0.02] text-zinc-800 dark:text-zinc-200 border border-black/5 dark:border-white/5'}`}>
-                    {renderMessageContent(msg, editingIndex === idx)}
-                  </div>
-                  <div className={`mt-1.5 flex items-center gap-3 transition-opacity duration-300 opacity-20 group-hover:opacity-100 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    {msg.timestamp && <span className="text-[10px] font-mono text-zinc-500 tabular-nums">{formatTime(msg.timestamp)}</span>}
-                    {msg.role === 'user' && editingIndex === null && !isStreaming && (
-                      <button onClick={() => handleStartEdit(idx)} className="p-1 text-zinc-500 hover:text-white hover:bg-white/5 rounded transition-all hidden md:block" title="Edit message"><Pencil size={12} /></button>
-                    )}
+            )}
+            
+            {chat.messages.map((msg, idx) => (
+              <div key={idx} className={`flex gap-3 md:gap-5 group animate-in fade-in slide-in-from-bottom-2 duration-500 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center shadow-sm mt-1 transition-transform group-hover:scale-110 ${msg.role === 'user' ? 'bg-indigo-600 text-white ring-1 ring-white/20' : 'bg-white/[0.03] text-indigo-400 border border-white/10'}`}>
+                  {msg.role === 'user' ? <User size={16} /> : <Zap size={16} />}
+                </div>
+                <div className={`flex-1 min-w-0 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                  <div className="relative inline-block max-w-full md:max-w-[92%]">
+                    <div className={`px-4 py-3 md:px-5 md:py-4 rounded-2xl text-[14px] md:text-[15px] transition-all w-full text-left ${msg.role === 'user' ? 'bg-zinc-100 dark:bg-zinc-900/40 text-zinc-900 dark:text-zinc-100 border-r-2 border-indigo-500 shadow-sm' : 'bg-zinc-50 dark:bg-white/[0.02] text-zinc-800 dark:text-zinc-200 border border-black/5 dark:border-white/5'}`}>
+                      {renderMessageContent(msg, editingIndex === idx)}
+                    </div>
+                    <div className={`mt-1.5 flex items-center gap-3 transition-opacity duration-300 opacity-20 group-hover:opacity-100 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                      {msg.timestamp && <span className="text-[10px] font-mono text-zinc-500 tabular-nums">{formatTime(msg.timestamp)}</span>}
+                      {msg.role === 'user' && editingIndex === null && !isStreaming && (
+                        <button onClick={() => handleStartEdit(idx)} className="p-1 text-zinc-500 hover:text-white hover:bg-white/5 rounded transition-all hidden md:block" title="Edit message"><Pencil size={12} /></button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-          {isStreaming && (
-            <div className="flex gap-5 animate-in fade-in">
-              <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-white/[0.03] text-indigo-400 border border-white/10 flex items-center justify-center mt-1"><Zap size={16} className="animate-pulse" /></div>
-              <div className="bg-zinc-50 dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-2xl px-5 py-4 flex gap-1.5 items-center">
-                <div className="typing-dot" style={{animationDelay: '0s'}}></div>
-                <div className="typing-dot" style={{animationDelay: '0.2s'}}></div>
-                <div className="typing-dot" style={{animationDelay: '0.4s'}}></div>
+            ))}
+            {isStreaming && (
+              <div className="flex gap-5 animate-in fade-in">
+                <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-white/[0.03] text-indigo-400 border border-white/10 flex items-center justify-center mt-1"><Zap size={16} className="animate-pulse" /></div>
+                <div className="bg-zinc-50 dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-2xl px-5 py-4 flex gap-1.5 items-center">
+                  <div className="typing-dot" style={{animationDelay: '0s'}}></div>
+                  <div className="typing-dot" style={{animationDelay: '0.2s'}}></div>
+                  <div className="typing-dot" style={{animationDelay: '0.4s'}}></div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Floating Scroll Down Button */}
+        {/* Floating Scroll Down Button - Now anchored within history container */}
         {!isAtBottom && (
-          <div className="fixed bottom-32 right-6 md:right-12 z-40 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="absolute bottom-6 right-6 md:right-12 z-40 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <button 
               onClick={() => {
                 setIsAtBottom(true);
@@ -513,11 +515,12 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         )}
       </div>
 
-      {/* Floating Pill Input */}
-      <div className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 z-30 pointer-events-none transition-all ${editingIndex !== null ? 'opacity-30 blur-[2px]' : ''}`}>
-        <div className="max-w-3xl mx-auto pointer-events-auto">
+      {/* Solid Bottom Area: Controls + Disclaimer */}
+      <div className={`w-full bg-[#050505] border-t border-white/[0.05] p-4 md:p-6 transition-all ${editingIndex !== null ? 'opacity-30 blur-[2px]' : ''}`}>
+        <div className="max-w-3xl mx-auto space-y-4">
+          {/* Attachments Preview */}
           {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4 animate-in slide-in-from-bottom-4 duration-300">
+            <div className="flex flex-wrap gap-2 mb-2 animate-in slide-in-from-bottom-4 duration-300">
               {attachments.map(att => (
                 <div key={att.id} className="relative group p-1.5 glass rounded-2xl border-white/10 flex items-center gap-2.5 pr-8 bg-zinc-900/80">
                   {att.type === 'image' ? <img src={att.previewUrl} className="w-9 h-9 object-cover rounded-lg border border-white/10" alt="Preview" /> : <div className="w-9 h-9 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><FileText size={16} /></div>}
@@ -531,6 +534,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             </div>
           )}
 
+          {/* Input Pill */}
           <div className={`glass relative flex flex-col border-white/10 rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 ${isStreaming ? 'ring-1 ring-white/10 opacity-90' : 'bg-zinc-50/90 dark:bg-[#0a0a0a]/80 focus-within:ring-2 focus-within:ring-indigo-500/40 ring-1 ring-black/5 dark:ring-white/5'}`}>
             <textarea
               ref={inputRef}
@@ -560,7 +564,12 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               </div>
             </div>
           </div>
-          <p className="hidden md:block text-[10px] text-zinc-500 dark:text-zinc-600 text-center mt-3 font-medium uppercase tracking-widest opacity-60">Powered by local inference • zero cloud latency</p>
+
+          {/* New Disclaimer Footer */}
+          <p className="text-[10px] md:text-[11px] text-zinc-600 text-center font-medium">
+            Yukime 1.5-alpha.4 by <a href="https://www.rickelindustries.co.ke" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400 hover:underline transition-all">Rickel Industries</a>. 
+            Yukime can make mistakes. Verify important info.
+          </p>
         </div>
       </div>
     </div>

@@ -11,27 +11,27 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onCreateChat, isConnected, onOp
   const isHttps = window.location.protocol === 'https:';
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-1000 relative overflow-hidden">
+    <div className="flex-1 flex flex-col items-center justify-start md:justify-center p-6 md:p-8 pt-24 md:pt-8 text-center animate-in fade-in zoom-in duration-1000 relative">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 blur-[120px] rounded-full -z-10" />
 
-      <div className="relative group mb-10">
+      <div className="relative group mb-8 md:mb-10 shrink-0">
         <div className="absolute -inset-8 bg-gradient-to-tr from-indigo-500 to-teal-400 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
-        <div className="w-24 h-24 rounded-[2rem] glass-strong flex items-center justify-center relative ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
-          <Zap size={48} className="text-indigo-400 fill-current floating" />
+        <div className="w-20 h-20 md:w-24 md:h-24 rounded-[1.5rem] md:rounded-[2rem] glass-strong flex items-center justify-center relative ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
+          <Zap size={40} className="md:size-[48px] text-indigo-400 fill-current floating" />
         </div>
       </div>
       
-      <div className="space-y-4 mb-16">
-        <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tighter transition-colors duration-300">
+      <div className="space-y-3 md:space-y-4 mb-10 md:mb-16">
+        <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tighter transition-colors duration-300 px-2">
           Intelligence, <span className="bg-gradient-to-r from-indigo-400 to-teal-400 bg-clip-text text-transparent">Unchained.</span>
         </h1>
-        <p className="max-w-xl mx-auto text-zinc-400 text-lg md:text-xl font-medium leading-relaxed transition-colors duration-300">
+        <p className="max-w-md md:max-w-xl mx-auto text-zinc-400 text-base md:text-xl font-medium leading-relaxed transition-colors duration-300 px-4">
           Yukime is your private window into local large language models. No accounts, no data leaks, no limits.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl px-2">
         <button 
           onClick={onCreateChat}
           className="flex flex-col items-start p-6 rounded-[2rem] glass hover:bg-white/[0.04] border-white/5 hover:border-indigo-500/30 transition-all group text-left"
@@ -55,28 +55,35 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onCreateChat, isConnected, onOp
         </button>
       </div>
 
-      <div className="mt-20 flex flex-wrap items-center justify-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
-        <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 tracking-widest uppercase">
-          <ShieldCheck size={14} /> 100% Private
+      <div className="mt-12 md:mt-16 flex flex-col items-center">
+        <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-500 mb-6">
+          <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-zinc-400 tracking-widest uppercase">
+            <ShieldCheck size={14} /> 100% Private
+          </div>
+          <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-zinc-400 tracking-widest uppercase">
+            <Globe size={14} /> Local Host
+          </div>
+          <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-zinc-400 tracking-widest uppercase">
+            <Command size={14} /> Open Source
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 tracking-widest uppercase">
-          <Globe size={14} /> Local Host
-        </div>
-        <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 tracking-widest uppercase">
-          <Command size={14} /> Open Source
-        </div>
+        
+        <p className="text-[11px] text-zinc-600 font-medium max-w-sm px-4">
+          Yukime 1.5-alpha.4 by <a href="https://www.rickelindustries.co.ke" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400 hover:underline transition-all">Rickel Industries</a>. 
+          Yukime can make mistakes. Verify important info.
+        </p>
       </div>
 
       {!isConnected && (
-        <div className="absolute top-8 px-6 py-2.5 rounded-full glass-strong border-rose-500/30 text-rose-400 text-[10px] font-bold tracking-[0.2em] animate-pulse flex flex-col gap-2 items-center">
+        <div className="absolute top-4 md:top-8 px-6 py-2.5 rounded-2xl md:rounded-full glass-strong border-rose-500/30 text-rose-400 text-[10px] font-bold tracking-[0.2em] animate-pulse flex flex-col gap-2 items-center mx-4 max-w-[calc(100%-2rem)]">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
             SYSTEM OFFLINE: START LM STUDIO
           </div>
           {isHttps && (
             <div className="text-[9px] text-zinc-500 normal-case tracking-normal max-w-xs text-center mt-1 border-t border-rose-500/10 pt-2">
-              <span className="text-rose-400 font-bold uppercase block mb-1">HTTPS Connection Blocked</span>
-              Since you're on Vercel, you must click the "shield" or "settings" icon in your URL bar and click <strong>"Allow Insecure Content"</strong> to talk to localhost.
+              <span className="text-rose-400 font-bold uppercase block mb-1 text-[8px]">Mixed Content Warning</span>
+              Localhost communication requires <strong>"Allow Insecure Content"</strong> in site settings.
             </div>
           )}
         </div>
